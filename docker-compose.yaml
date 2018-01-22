@@ -11,9 +11,8 @@ services:
       - "29418:29418"
       - "80:8080"
     links:
-      - postgres
+      - ldap
     depends_on:
-      - postgres
       - ldap
     volumes:
      - ~/gerrit_volume:/var/gerrit/review_site
@@ -22,15 +21,6 @@ services:
        #- /external/gerrit/index:/var/gerrit/index
        #- /external/gerrit/cache:/var/gerrit/cache
 #    entrypoint: java -jar /var/gerrit/bin/gerrit.war init -d /var/gerrit
-
-  postgres:
-    image: postgres:9.6
-    environment:
-      - POSTGRES_USER=gerrit
-      - POSTGRES_PASSWORD=secret
-      - POSTGRES_DB=reviewdb
-    volumes:
-      - /external/gerrit/postgres:/var/lib/postgresql/data
 
   ldap:
     image: osixia/extend-osixia-openldap:0.1.0

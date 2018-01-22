@@ -1,0 +1,51 @@
+version: '3'
+
+services:
+  gerrit:
+    image: openfrontier/gerrit
+    environment:
+      - AUTH_TYPE=LDAP
+      - LDAP_SERVER=ldap://ldap
+      - LDAP_ACCOUNTBASE=People.example.org
+    ports:
+      - "29418:29418"
+      - "80:8080"
+    links:
+      - postgres
+    depends_on:
+      - postgres
+      - ldap
+    volumes:
+     - ~/gerrit_volume:/var/gerrit/review_site
+       #- /external/gerrit/etc:/var/gerrit/etc
+       #- /external/gerrit/git:/var/gerrit/git
+       #- /external/gerrit/index:/var/gerrit/index
+       #- /external/gerrit/cache:/var/gerrit/cache
+#    entrypoint: java -jar /var/gerrit/bin/gerrit.war init -d /var/gerrit
+
+  postgres:
+    image: postgres:9.6
+    environment:
+      - POSTGRES_USER=gerrit
+      - POSTGRES_PASSWORD=secret
+      - POSTGRES_DB=reviewdb
+    volumes:
+      - /external/gerrit/postgres:/var/lib/postgresql/data
+
+  ldap:
+    image: osixia/extend-osixia-openldap:0.1.0
+    ports:
+      - "389:389"
+      - "636:636"
+    environment:
+      - LDAP_ADMIN_PASSWORD=secret
+    volumes:
+      - /external/gerrit/ldap/var:/var/lib/ldap
+      - /external/gerrit/ldap/etc:/etc/ldap/slapd.d
+
+  ldap-admin:
+    image: osixia/phpldapadmin
+    ports:
+      - "6443:443"
+    environment:
+      - PHPLDAPADMIN_LDAP_HOSTS=ldap
